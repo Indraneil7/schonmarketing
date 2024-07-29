@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced ROI Calculator</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333333;
+        }
+
+        header {
+            background-color: #ffffff;
+            padding: 2rem 0;
+            text-align: center;
+            border-bottom: 5px solid #28B83F;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header img {
+            max-width: 120px;
+            background-color: #ffffff;
+            padding: 0.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        nav {
+            background-color: #1A7B29;
+            border-bottom: 5px solid #28B83F;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul li {
+            margin: 0 1rem;
+        }
+
+        nav ul li a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 1rem 1.5rem;
+            display: block;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        nav ul li a:hover {
+            background-color: #28B83F;
+        }
+
+        main {
+            padding: 3rem 1rem;
+            text-align: center;
+        }
+
+        .calculator-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: left;
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .result, .chart-container {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        .chart {
+            width: 100%;
+            height: 400px;
+        }
+
+        footer {
+            background-color: #1A7B29;
+            color: #ffffff;
+            text-align: center;
+            padding: 1rem 0;
+            border-top: 5px solid #28B83F;
+            margin-top: 2rem;
+        }
+
+        footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="/Users/indra/Files D/EV/AffiliatePrograms/logo_2.png" alt="Schon Logo">
+        <h1>Advanced ROI Calculator</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="marketing.html">Marketing Material</a></li>
+            <li><a href="email.html">Email Templates</a></li>
+            <li><a href="guide.html">Seller's Guide</a></li>
+            <li><a href="product.html">Product Information</a></li>
+            <li><a href="charging.html">Estimated Charging Time</a></li>
+            <li><a href="roi.html">ROI Estimator</a></li>
+        </ul>
+    </nav>
+    <main>
+        <div class="calculator-container">
+            <label for="number_of_chargers">Number of Chargers:</label>
+            <input type="number" id="number_of_chargers" placeholder="Enter number of chargers" min="1">
+
+            <label for="hotel_infrastructure">Infrastructure Cost (Hotel):</label>
+            <input type="number" id="hotel_infrastructure" placeholder="Enter infrastructure cost for the hotel">
+
+            <label for="energy_cost">Energy Cost (per kWh):</label>
+            <input type="number" step="0.01" id="energy_cost" placeholder="Enter energy cost per kWh">
+
+            <label for="profit_share">Profit Share with Hotel (%):</label>
+            <input type="number" step="0.01" id="profit_share" placeholder="Enter profit share percentage for the hotel">
+
+            <label for="charge_frequency">Charge Frequency:</label>
+            <select id="charge_frequency">
+                <option value="1">1 charge per charger per day</option>
+                <option value="2">1 charge per charger per 2 days</option>
+                <option value="4">1 charge per charger per 4 days</option>
+                <option value="8">1 charge per charger per 8 days</option>
+                <option value="14">1 charge per charger per 2 weeks</option>
+            </select>
+
+            <label for="growth_rate">Growth in Charges (%):</label>
+            <input type="number" step="0.01" id="growth_rate" placeholder="Enter growth in charges (optional)">
+
+            <button onclick="calculateROI()">Calculate ROI</button>
+
+            <div class="result" id="result"></div>
+            <div class="chart-container">
+                <canvas id="breakEvenChart" class="chart"></canvas>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 Schön. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function calculateROI() {
+            const numberOfChargers = parseInt(document.getElementById('number_of_chargers').value) || 2;
+            const equipmentCost = 1519.96;
+            const energyMaestroCost = 1080;
+            const serviceCost = 1000;
+            const totalCostPerCharger = 3599.96;
+            const totalProjectCostSchon = totalCostPerCharger * numberOfChargers;
+            const hotelInfrastructure = parseFloat(document.getElementById('hotel_infrastructure').value) || 0;
+            const totalProjectCostHotel = hotelInfrastructure;
+            const totalUpfrontInvestment = totalProjectCostSchon + totalProjectCostHotel;
+
+            const energyCostPerKWh = parseFloat(document.getElementById('energy_cost').value) || 0.16;
+            const plugFee = 19.95;
+            const totalElectricityCostPerCharge = energyCostPerKWh * 48;
+            const baseUtilityCharge = 148;
+
+            const chargeFrequency = parseInt(document.getElementById('charge_frequency').value);
+            const growthRate = parseFloat(document.getElementById('growth_rate').value) / 100 || 0;
+
+            let chargesPerMonth = (30 / chargeFrequency) * numberOfChargers;
+            let monthlyRevenue = chargesPerMonth * plugFee;
+            let monthlyCost = baseUtilityCharge + (totalElectricityCostPerCharge * chargesPerMonth);
+            let monthlyProfit = monthlyRevenue - monthlyCost;
+
+            const profitSharePercentage = parseFloat(document.getElementById('profit_share').value) || 50;
+            let monthlyProfitHotel = (monthlyProfit * profitSharePercentage) / 100;
+
+            let annualProfitAfterBreakeven = [];
+            let cumulativeProfit = -totalProjectCostHotel;
+            let breakevenMonthCount = 0;
+            let reachedBreakeven = false;
+            let annualProfit = 0;
+
+            for (let i = 0; i < 10; i++) {
+                chargesPerMonth *= (1 + growthRate);
+                monthlyRevenue = chargesPerMonth * plugFee;
+                monthlyCost = baseUtilityCharge + (totalElectricityCostPerCharge * chargesPerMonth);
+                monthlyProfit = monthlyRevenue - monthlyCost;
+                monthlyProfitHotel = (monthlyProfit * profitSharePercentage) / 100;
+                annualProfit = monthlyProfitHotel * 12;
+
+                if (!reachedBreakeven) {
+                    cumulativeProfit += annualProfit;
+                    annualProfitAfterBreakeven.push(cumulativeProfit);
+                    if (cumulativeProfit >= 0) {
+                        reachedBreakeven = true;
+                        const monthlyProfitHotelWithGrowth = monthlyProfitHotel;
+                        const monthsToBreakeven = Math.ceil(-cumulativeProfit / monthlyProfitHotelWithGrowth);
+                        breakevenMonthCount += monthsToBreakeven;
+                    } else {
+                        breakevenMonthCount += 12;
+                    }
+                } else {
+                    annualProfitAfterBreakeven.push(annualProfit);
+                }
+            }
+
+            let startDate = new Date();
+            startDate.setFullYear(startDate.getFullYear() + 1);
+            let breakevenDate = new Date(startDate);
+            breakevenDate.setMonth(startDate.getMonth() + breakevenMonthCount);
+
+            const breakevenYears = Math.floor(breakevenMonthCount / 12);
+            const breakevenMonths = breakevenMonthCount % 12;
+
+            document.getElementById('result').innerHTML = `
+                Number of Charging Sessions per Month: ${chargesPerMonth.toFixed(2)}<br>
+                Annual Profit after Breakeven: $${annualProfit.toFixed(2)}<br>
+                Breakeven Time: ${breakevenDate.toLocaleString('default', { month: 'long' })} ${breakevenDate.getFullYear()} 
+            `;
+
+            const ctx = document.getElementById('breakEvenChart').getContext('2d');
+            const labels = [];
+            const data = [];
+            let currentYear = startDate.getFullYear();
+            for (let i = 0; i < annualProfitAfterBreakeven.length; i++) {
+                labels.push(currentYear);
+                data.push(annualProfitAfterBreakeven[i]);
+                currentYear++;
+            }
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Annual Profit After Breakeven',
+                        data: data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1,
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Profit ($)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Year'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
